@@ -1,46 +1,62 @@
 import pygame
 pygame.init()
-window = pygame.display.set_mode((750, 750))
-window.fill((158, 213, 0))
-clock = pygame.time.Clock()
-
-class Area():
-    def __init__(self, x=0, y=0, width=10, height=10, color=(255, 255, 255)):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.color = color
-        self.fill_color = color
-        self.rect = pygame.Rect(x, y, width, height)
-        
-    def set_color(self, new_color):
-        self.fill_color = new_color
-
-    def fill(self):
-        pygame.draw.rect(window, self.fill_color, self.rect)
-
-    def outline(self, frame_color, thickness):
-        pygame.draw.rect(window, frame_color, self.rect, thickness)
-
-    def collidepoint(self, x, y):
-        return self.rect.collidepoint(x, y)
-
-class Picture(Area):
-    def __init__(self, filename, x=0, y=0, width=10, height=10):
-        super().__init__(x=x, y=y, width=width, height=height)
-        self.image = pygame.transform.scale(pygame.image.load(filename), (width, height))
-        
-    def draw(self):
+window=pygame.display.set_mode((1400, 715))
+background=pygame.image.load("Slider-CL01-Background.png")
+background=pygame.transform.scale(background, (1400, 715))
+clock=pygame.time.Clock()
+pygame.mixer.music.load("Toby Fox - Megalovania.mp3.crdownload")
+pygame.mixer.music.play(-1)
+class Pepsi():
+    def __init__(self, x, y, width, height, step, image_pepsi):
+        self.x=x
+        self.y=y
+        self.width=width
+        self.height=height
+        self.step=step
+        self.image=pygame.image.load(image_pepsi)
+        self.image=pygame.transform.scale(self.image, (self.width, self.height))
+    
+    def draw(self, x, y):
         window.blit(self.image, (self.x, self.y))
 
-platform_x = 200
-platform_y = 300
+    def update(self):
+        keys=pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]and self.x>0:
+            self.x-=self.step
+        if keys[pygame.K_RIGHT]and self.x<1400-100:
+            self.x+=self.step 
 
-# ВАЖЛИВО: ці зображення мають бути в одній папці з .py файлом
-ball = Picture("ball.png", 160, 200, 50, 50)
-platform = Picture("platform.png", platform_x, platform_y, 100, 30)
 
+
+class Enemy(Pepsi):
+    def draw(self, x, y):
+        window.blit(self.image, (self.x, self.y))
+
+
+
+class Boll():
+    def __init__(self, x, y, width, height, step, image_boll):
+        self.x=x
+        self.y=y
+        self.width=width
+        self.height=height
+        self.step=step
+        self.image=pygame.image.load(image_boll)
+        self.image=pygame.transform.scale(self.image, (self.width, self.height))
+
+    
+    def move(self):
+        self.x+=self.speed_x
+        self.y+=self.speed_y
+
+        if self.x <= self.radius or self.x >= win_width - self.radius:
+            self.speed_x*=-1
+        if self.y <= self.radius:
+            self.speed_y*=-1
+
+player=Pepsi(550, 350, 10, 10, 15, "loading-bar-four-quarters-game-asset-2d-icon-transparent-background-png.webp")
+enemy=Enemy(100, 100, 10, 10, 15, "Blue-Monster-PNG-File.png")
+boll=Boll(100, 100, 10, 10, 15, "tennis-ball-png-photo-2.png")
 # створення ворогів
 start_x = 5
 start_y = 5
@@ -49,40 +65,22 @@ for i in range(4):
     y = start_y + (55 * i)
     x = start_x + (25 * i)
     for j in range(4):
-        enemy = Picture("enemy.png", x, y, 50, 50)
+        enemy = Enemy("enemy.png", x, y, 50, 50)
         monsters.append(enemy)
         x += 55
-speed_x=3
-speed_y=3
-game = True
+game=True
 while game:
-    window.fill((158, 213, 0))
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            game = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RIGHT:
-                platform.x += 3
-            if event.key==pygame.K_LEFT:
-                platform.x-=3
-            
-
-    for m in monsters:
-        m.draw()
-
-    platform.draw()
-    ball.draw()
-    ball.rect_x+=speed_x
-    ball.rect_y+=speed_y
-    if ball.rect_y<0:
-        speed_y*=-1
-    if ball.rect_x<0 or ball.rect_x>750:
-        speed_x*=-1
-    if ball.rect.collidepoint(platform.rect):
-        speed_x*=-1
-        speed_y*=-1
-
-    clock.tick(40)
+        if event.type==pygame.QUIT:
+            game=False
+    window.fill((0, 0, 0))
+    window.blit(background, (0, 0))
+    player.draw(10, 10)
     pygame.display.update()
-
+    player.update()
+    enemy.draw(10, 10)
+    boll.move()
+    pygame.display.update()
+    clock.tick(40)
 pygame.quit()
+
